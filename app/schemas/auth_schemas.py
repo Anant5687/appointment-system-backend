@@ -8,20 +8,28 @@ class RegisterReq(BaseModel):
     email: EmailStr
     password: str
     phone: int
-    role: str
+    role_id: str
+
+
+class RegisterData(BaseModel):
+    id: str
+    name: str
+    email: EmailStr
+    phone: int
+    role_id: str
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class RegisterRes(BaseModel):
-    id: str
-    name: str
-    email: EmailStr
-    phone: int
-    role: str
-    is_active: bool
-    created_at: datetime
-    updated_at: datetime
+    status: int
+    data: RegisterData
+    message: str
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LoginReq(BaseModel):
@@ -31,7 +39,7 @@ class LoginReq(BaseModel):
 
 class LoginData(BaseModel):
     id: str
-    role: str
+    role_id: str
     phone: int
     is_active: bool
     token: str

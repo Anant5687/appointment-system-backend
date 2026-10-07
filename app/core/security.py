@@ -6,7 +6,7 @@ from app.core.settings import settings
 password_hash = PasswordHash.recommended()
 
 def hash_password(plain_pass: str):
-    return password_hash.hash(hash_password)
+    return password_hash.hash(plain_pass)
 
 def verify_password(plain_pass: str, hash_pass: str):
     return password_hash.verify(plain_pass, hash_pass)
