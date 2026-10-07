@@ -17,7 +17,11 @@ class AuthService:
         db.commit()
         db.refresh(new_user)
 
-        return {"status": 201, "messaage": "User added successfully", data: new_user}
+        return {
+            "status": 201,
+            "message": "User added successfully",
+            "data": new_user,
+        }
 
     @staticmethod
     def login_user(data: LoginReq, db: Session):

@@ -8,7 +8,9 @@ import uuid
 class UsersModel(BASE):
     __tablename__ = "users"
 
-    id = Column(String, primary_key=True, default=str(uuid.uuid4()), nullable=False)
+    id = Column(
+        String, primary_key=True, default=lambda: str(uuid.uuid4()), nullable=False
+    )
 
     name = Column(String, nullable=False, unique=True)
 
@@ -16,7 +18,7 @@ class UsersModel(BASE):
 
     password = Column(String, nullable=False)
 
-    phone = Column(Integer, nullable=False, unique=True)
+    phone = Column(String, nullable=False, unique=True)
 
     role_id = Column(String, ForeignKey("roles.id"), nullable=False)
 
