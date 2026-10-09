@@ -45,3 +45,10 @@ class AllBookingRes(BaseModel):
     data: list[BookingResData]
 
     model_config = ConfigDict(from_attributes=True)
+
+class BookingUpdateReq(BaseModel):
+    appointment_date: date
+    start_time: time
+    end_time: time
+    provider_id: str
+    location_id: str
