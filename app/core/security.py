@@ -16,10 +16,18 @@ def create_token(user_id: str):
         minutes=settings.JWT_TOKEN_EXPIRE
     )
 
-    payload = {"sub": user_id, "expire": expires_at}
+    payload = {"sub": user_id, "exp": expires_at}
 
     token = jwt.encode(
         payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHIM
     )
 
     return token
+
+
+def decode_token(token: str):
+    return jwt.decode(
+        token,
+        settings.JWT_SECRET_KEY,
+        algorithms=[settings.JWT_ALGORITHIM],
+    )
