@@ -21,7 +21,10 @@ def get_all_users(db: Session = Depends(get_db)):
 
 
 @router.get("/user/{user_id}", response_model=list[RegisterRes])
-def get_user_by_id(user_id: str, db: Session = Depends(get_db)):
+def get_user_by_id(
+    user_id: str,
+    db: Session = Depends(get_db),
+):
     try:
         return AdminService.get_user_by_id(user_id, db)
     except HTTPException:
@@ -33,7 +36,11 @@ def get_user_by_id(user_id: str, db: Session = Depends(get_db)):
 
 
 @router.patch("/user/{user_id}", response_model=RegisterRes)
-def update_user(user_id: str, data: RegisterReq, db: Session = Depends(get_db)):
+def update_user(
+    user_id: str,
+    data: RegisterReq,
+    db: Session = Depends(get_db),
+):
     try:
         return AdminService.update_user(user_id, data, db)
     except HTTPException:
@@ -69,7 +76,11 @@ def all_bookings(db: Session = Depends(get_db)):
 
 
 @router.patch("/booking/{booking_id}", response_model=BookingRes)
-def update_booking(booking_id: str, data: BookingReq, db: Session = Depends(get_db)):
+def update_booking(
+    booking_id: str,
+    data: BookingReq,
+    db: Session = Depends(get_db),
+):
     try:
         return AdminService.update_booking(booking_id, data, db)
     except HTTPException:

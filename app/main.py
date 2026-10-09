@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from app.db.database import create_db
+from app.core.auth import get_admin_user
 from app.routers.auth_routers import router as auth_routers
 from app.routers.roles_routers import router as roles_routers
 from app.routers.admin_routers import router as admin_routers
@@ -18,6 +19,6 @@ def health_check():
 
 app.include_router(roles_routers)
 app.include_router(auth_routers)
-app.include_router(admin_routers)
+app.include_router(admin_routers, dependencies=[Depends(get_admin_user)])
 app.include_router(booking_router)
 app.include_router(services_routers)
