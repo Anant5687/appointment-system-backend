@@ -19,7 +19,7 @@ class ServicesModel(BASE):
 
     price = Column(Integer, nullable=False)
 
-    is_active = Column(Boolean, nullable=True)
+    is_active = Column(Boolean, nullable=True, default=True, server_default=True)
 
     created_at = Column(
         TIMESTAMP(timezone=True),
