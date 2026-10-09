@@ -3,6 +3,7 @@ from app.models.bookings_models import BookingsModel
 from sqlalchemy.orm import Session
 
 from app.schemas.auth_schemas import RegisterReq
+from app.schemas.booking_schemas import BookingReq
 
 from fastapi import HTTPException
 
@@ -58,10 +59,14 @@ class AdminService:
 
     @staticmethod
     def all_bookings(db: Session):
-        return db.query(BookingsModel).all()
+        return {
+            "data": db.query(BookingsModel).all(),
+            "status": 200,
+            "message": "User data successfully fetched",
+        }
 
     @staticmethod
-    def update_booking(booking_id: str, data, db: Session):
+    def update_booking(booking_id: str, data: BookingReq, db: Session):
         is_booking = (
             db.query(BookingsModel).filter(BookingsModel.id == booking_id).first()
         )
