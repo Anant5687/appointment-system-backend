@@ -11,7 +11,7 @@ router = APIRouter(prefix="/admin", tags=["Admin"])
 @router.get("/users", response_model=list[AllUserResponse])
 def get_all_users(db: Session = Depends(get_db)):
     try:
-        AdminService.get_all_users(db)
+        return AdminService.get_all_users(db)
     except HTTPException:
         raise
     except Exception as e:
@@ -23,7 +23,7 @@ def get_all_users(db: Session = Depends(get_db)):
 @router.get("/user/{user_id}", response_model=list[RegisterRes])
 def get_user_by_id(user_id: str, db: Session = Depends(get_db)):
     try:
-        AdminService.get_user_by_id(user_id, db)
+        return AdminService.get_user_by_id(user_id, db)
     except HTTPException:
         raise
     except Exception as e:
@@ -35,7 +35,7 @@ def get_user_by_id(user_id: str, db: Session = Depends(get_db)):
 @router.patch("/user/{user_id}", response_model=RegisterRes)
 def update_user(user_id: str, data: RegisterReq, db: Session = Depends(get_db)):
     try:
-        AdminService.update_user(user_id, data, db)
+        return AdminService.update_user(user_id, data, db)
     except HTTPException:
         raise
     except Exception as e:
@@ -47,7 +47,7 @@ def update_user(user_id: str, data: RegisterReq, db: Session = Depends(get_db)):
 @router.delete("/user/{user_id}", response_model=RegisterRes)
 def delete_user(user_id: str, db: Session = Depends(get_db)):
     try:
-        AdminService.delete_user(user_id, db)
+        return AdminService.delete_user(user_id, db)
     except HTTPException:
         raise
     except Exception as e:
@@ -59,7 +59,7 @@ def delete_user(user_id: str, db: Session = Depends(get_db)):
 @router.get("/bookings", response_model=AllBookingRes)
 def all_bookings(db: Session = Depends(get_db)):
     try:
-        AdminService.all_bookings(db)
+        return AdminService.all_bookings(db)
     except HTTPException:
         raise
     except Exception as e:
@@ -71,7 +71,7 @@ def all_bookings(db: Session = Depends(get_db)):
 @router.patch("/booking/{booking_id}", response_model=BookingRes)
 def update_booking(booking_id: str, data: BookingReq, db: Session = Depends(get_db)):
     try:
-        AdminService.update_booking(booking_id, data, db)
+        return AdminService.update_booking(booking_id, data, db)
     except HTTPException:
         raise
     except Exception as e:
