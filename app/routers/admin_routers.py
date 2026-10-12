@@ -3,7 +3,11 @@ from app.db.database import get_db
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, APIRouter, Depends
 from app.schemas.auth_schemas import AllUserResponse, RegisterRes, RegisterReq
-from app.schemas.booking_schemas import BookingRes, BookingReq, AllBookingRes
+from app.schemas.booking_schemas import (
+    AdminBookingUpdateReq,
+    BookingRes,
+    AllBookingRes,
+)
 from app.schemas.provider_schemas import (
     ProviderCreateReq,
     ProviderRes,
@@ -81,10 +85,13 @@ def all_bookings(db: Session = Depends(get_db)):
         )
 
 
-@router.patch("/booking/{booking_id}", response_model=BookingRes)
+@router.patch("/bookings/{booking_id}", response_model=BookingRes)
+@router.patch(
+    "/booking/{booking_id}", response_model=BookingRes, include_in_schema=False
+)
 def update_booking(
     booking_id: str,
-    data: BookingReq,
+    data: AdminBookingUpdateReq,
     db: Session = Depends(get_db),
 ):
     try:

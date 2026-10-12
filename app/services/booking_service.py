@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from app.schemas.booking_schemas import BookingReq, BookingUpdateReq
+from app.schemas.booking_schemas import BookingCreateReq, BookingUpdateReq
 from app.models.bookings_models import BookingsModel
+from app.models.enums import BookingStatus
 from app.models.providers_models import ProviderModel
-from sqlalchemy import or_
 
 
 class BookingService:
@@ -28,19 +28,18 @@ class BookingService:
                 status_code=404, detail=f"Booking not found with {booking_id}"
             )
 
-        provider_id = BookingService.__provider_id_for_user__(user_id, db)
-        if booking.customer_id != user_id and booking.provider_id != provider_id:
+        if booking.customer_id != user_id:
             raise HTTPException(status_code=403, detail="Booking access denied")
 
         return booking
 
     @staticmethod
-    def create_booking(data: BookingReq, user_id: str, db: Session):
-        provider_id = BookingService.__provider_id_for_user__(user_id, db)
-        if data.customer_id != user_id and data.provider_id != provider_id:
-            raise HTTPException(status_code=403, detail="Booking access denied")
-
-        new_booking = BookingsModel(**data.model_dump())
+    def create_booking(data: BookingCreateReq, user_id: str, db: Session):
+        new_booking = BookingsModel(
+            customer_id=user_id,
+            status=BookingStatus.PENDING,
+            **data.model_dump(),
+        )
         db.add(new_booking)
         db.commit()
         db.refresh(new_booking)
@@ -53,13 +52,11 @@ class BookingService:
 
     @staticmethod
     def get_bookings(user_id: str, db: Session):
-        provider_id = BookingService.__provider_id_for_user__(user_id, db)
-        access_filter = BookingsModel.customer_id == user_id
-        if provider_id is not None:
-            access_filter = or_(
-                access_filter, BookingsModel.provider_id == provider_id
-            )
-        bookings = db.query(BookingsModel).filter(access_filter).all()
+        bookings = (
+            db.query(BookingsModel)
+            .filter(BookingsModel.customer_id == user_id)
+            .all()
+        )
 
         return {
             "status": 200,
@@ -80,8 +77,12 @@ class BookingService:
     @staticmethod
     def cancel_booking(booking_id: str, user_id: str, db: Session):
         booking = BookingService.__check_booking__(booking_id, user_id, db)
+        if booking.status not in (BookingStatus.PENDING, BookingStatus.CONFIRMED):
+            raise HTTPException(
+                status_code=409, detail="Booking cannot be cancelled in its current status"
+            )
 
-        booking.status = "CANCELLED"
+        booking.status = BookingStatus.CANCELLED
         db.commit()
         db.refresh(booking)
 
@@ -96,17 +97,13 @@ class BookingService:
         booking_id: str, data: BookingUpdateReq, user_id: str, db: Session
     ):
         booking = BookingService.__check_booking__(booking_id, user_id, db)
-        provider_id = BookingService.__provider_id_for_user__(user_id, db)
-        if (
-            booking.customer_id != user_id
-            and data.provider_id != provider_id
-        ):
+        if booking.status not in (BookingStatus.PENDING, BookingStatus.CONFIRMED):
             raise HTTPException(
-                status_code=403,
-                detail="Providers can only reschedule their own bookings",
+                status_code=409,
+                detail="Booking cannot be rescheduled in its current status",
             )
 
-        for key, value in data.dict().items():
+        for key, value in data.model_dump().items():
             setattr(booking, key, value)
 
         db.commit()
@@ -115,5 +112,74 @@ class BookingService:
         return {
             "status": 200,
             "message": "Booking updated successfully",
+            "data": booking,
+        }
+
+    @staticmethod
+    def get_provider_bookings(user_id: str, db: Session):
+        provider = (
+            db.query(ProviderModel)
+            .filter(
+                ProviderModel.user_id == user_id,
+                ProviderModel.is_active.is_(True),
+            )
+            .first()
+        )
+        if provider is None:
+            raise HTTPException(status_code=404, detail="Provider profile not found")
+        return {
+            "status": 200,
+            "message": "Provider bookings fetched successfully",
+            "data": db.query(BookingsModel)
+            .filter(BookingsModel.provider_id == provider.id)
+            .all(),
+        }
+
+    @staticmethod
+    def update_provider_booking_status(
+        booking_id: str,
+        user_id: str,
+        status: BookingStatus,
+        db: Session,
+    ):
+        provider = (
+            db.query(ProviderModel)
+            .filter(
+                ProviderModel.user_id == user_id,
+                ProviderModel.is_active.is_(True),
+            )
+            .first()
+        )
+        if provider is None:
+            raise HTTPException(status_code=404, detail="Provider profile not found")
+
+        booking = (
+            db.query(BookingsModel)
+            .filter(
+                BookingsModel.id == booking_id,
+                BookingsModel.provider_id == provider.id,
+            )
+            .first()
+        )
+        if booking is None:
+            raise HTTPException(status_code=404, detail="Booking not found")
+
+        allowed_current_status = {
+            BookingStatus.CONFIRMED: (BookingStatus.PENDING,),
+            BookingStatus.COMPLETED: (BookingStatus.CONFIRMED,),
+            BookingStatus.NO_SHOW: (BookingStatus.CONFIRMED,),
+        }
+        if booking.status not in allowed_current_status[status]:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Booking cannot be marked {status.value} in its current status",
+            )
+
+        booking.status = status
+        db.commit()
+        db.refresh(booking)
+        return {
+            "status": 200,
+            "message": f"Booking marked {status.value.lower()} successfully",
             "data": booking,
         }
