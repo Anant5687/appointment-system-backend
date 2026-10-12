@@ -6,6 +6,7 @@ from app.routers.roles_routers import router as roles_routers
 from app.routers.admin_routers import router as admin_routers
 from app.routers.booking_router import router as booking_router
 from app.routers.services_routers import router as services_routers
+from app.routers.provider_routers import router as provider_routers
 
 app = FastAPI()
 
@@ -22,3 +23,4 @@ app.include_router(auth_routers)
 app.include_router(admin_routers, dependencies=[Depends(get_admin_user)])
 app.include_router(booking_router)
 app.include_router(services_routers)
+app.include_router(provider_routers)
