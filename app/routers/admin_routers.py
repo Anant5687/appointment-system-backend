@@ -3,7 +3,17 @@ from app.db.database import get_db
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, APIRouter, Depends
 from app.schemas.auth_schemas import AllUserResponse, RegisterRes, RegisterReq
-from app.schemas.booking_schemas import BookingRes, BookingReq, AllBookingRes
+from app.schemas.booking_schemas import (
+    AdminBookingUpdateReq,
+    BookingRes,
+    AllBookingRes,
+)
+from app.schemas.provider_schemas import (
+    ProviderCreateReq,
+    ProviderRes,
+    ProviderUpdateReq,
+)
+from app.services.provider_service import ProviderService
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -75,14 +85,57 @@ def all_bookings(db: Session = Depends(get_db)):
         )
 
 
-@router.patch("/booking/{booking_id}", response_model=BookingRes)
+@router.patch("/bookings/{booking_id}", response_model=BookingRes)
+@router.patch(
+    "/booking/{booking_id}", response_model=BookingRes, include_in_schema=False
+)
 def update_booking(
     booking_id: str,
-    data: BookingReq,
+    data: AdminBookingUpdateReq,
     db: Session = Depends(get_db),
 ):
     try:
         return AdminService.update_booking(booking_id, data, db)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"{str(e) or "Internal server error"}"
+        )
+
+
+@router.post("/providers", response_model=ProviderRes, status_code=201)
+def create_provider(data: ProviderCreateReq, db: Session = Depends(get_db)):
+    try:
+        return ProviderService.create_provider(data, db)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"{str(e) or "Internal server error"}"
+        )
+
+
+@router.patch("/providers/{provider_id}", response_model=ProviderRes)
+def update_provider(
+    provider_id: str,
+    data: ProviderUpdateReq,
+    db: Session = Depends(get_db),
+):
+    try:
+        return ProviderService.update_provider(provider_id, data, db)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"{str(e) or "Internal server error"}"
+        )
+
+
+@router.delete("/providers/{provider_id}", response_model=ProviderRes)
+def delete_provider(provider_id: str, db: Session = Depends(get_db)):
+    try:
+        return ProviderService.delete_provider(provider_id, db)
     except HTTPException:
         raise
     except Exception as e:

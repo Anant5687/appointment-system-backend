@@ -3,7 +3,7 @@ from app.models.bookings_models import BookingsModel
 from sqlalchemy.orm import Session
 
 from app.schemas.auth_schemas import RegisterReq
-from app.schemas.booking_schemas import BookingReq
+from app.schemas.booking_schemas import AdminBookingUpdateReq
 
 from fastapi import HTTPException
 
@@ -66,7 +66,7 @@ class AdminService:
         }
 
     @staticmethod
-    def update_booking(booking_id: str, data: BookingReq, db: Session):
+    def update_booking(booking_id: str, data: AdminBookingUpdateReq, db: Session):
         is_booking = (
             db.query(BookingsModel).filter(BookingsModel.id == booking_id).first()
         )
@@ -76,7 +76,15 @@ class AdminService:
                 status_code=404, detail=f"Booking not found with {booking_id}"
             )
 
-        for key, value in data.dict().items():
+        updates = data.model_dump(exclude_unset=True)
+        start_time = updates.get("start_time", is_booking.start_time)
+        end_time = updates.get("end_time", is_booking.end_time)
+        if end_time <= start_time:
+            raise HTTPException(
+                status_code=422, detail="end_time must be later than start_time"
+            )
+
+        for key, value in updates.items():
             setattr(is_booking, key, value)
 
         db.commit()
