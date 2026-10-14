@@ -44,9 +44,7 @@ def get_my_availability(
         )
 
 
-@router.post(
-    "/me/availability", response_model=AvailabilityRes, status_code=201
-)
+@router.post("/me/availability", response_model=AvailabilityRes, status_code=201)
 def create_my_availability(
     data: AvailabilityCreateReq,
     db: Session = Depends(get_db),
@@ -100,9 +98,7 @@ def delete_my_availability(
 
 
 @router.get("/{provider_id}/availability", response_model=AvailabilityListRes)
-def get_provider_availability(
-    provider_id: str, db: Session = Depends(get_db)
-):
+def get_provider_availability(provider_id: str, db: Session = Depends(get_db)):
     try:
         return ProviderService.get_provider_availability(provider_id, db)
     except HTTPException:
