@@ -3,7 +3,6 @@ from sqlalchemy import Boolean, Column, ForeignKey, String, TIMESTAMP, text
 
 import uuid
 
-
 class ProviderModel(BASE):
     __tablename__ = "providers"
 
