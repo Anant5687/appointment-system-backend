@@ -13,6 +13,7 @@ class RolesData(BaseModel):
     id: str
     created_at: datetime
 
+
 class AllRolesRes(BaseModel):
     status: int
     message: str
