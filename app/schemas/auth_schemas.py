@@ -23,6 +23,7 @@ class RegisterData(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class AllUserResponse(BaseModel):
     status: int
     data: list[RegisterData]
