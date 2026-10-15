@@ -63,6 +63,7 @@ class AllBookingRes(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class BookingUpdateReq(BaseModel):
     appointment_date: date
     start_time: time

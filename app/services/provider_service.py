@@ -30,9 +30,7 @@ class ProviderService:
     @staticmethod
     def _get_provider_for_user(user_id: str, db: Session) -> ProviderModel:
         provider = (
-            db.query(ProviderModel)
-            .filter(ProviderModel.user_id == user_id)
-            .first()
+            db.query(ProviderModel).filter(ProviderModel.user_id == user_id).first()
         )
         if provider is None:
             raise HTTPException(status_code=404, detail="Provider profile not found")
@@ -83,9 +81,7 @@ class ProviderService:
         }
 
     @staticmethod
-    def update_provider(
-        provider_id: str, data: ProviderUpdateReq, db: Session
-    ):
+    def update_provider(provider_id: str, data: ProviderUpdateReq, db: Session):
         provider = ProviderService._get_provider(provider_id, db, active_only=False)
         for field, value in data.model_dump(exclude_unset=True).items():
             if value is not None:
@@ -142,9 +138,7 @@ class ProviderService:
         }
 
     @staticmethod
-    def create_my_availability(
-        user_id: str, data: AvailabilityCreateReq, db: Session
-    ):
+    def create_my_availability(user_id: str, data: AvailabilityCreateReq, db: Session):
         provider = ProviderService._get_provider_for_user(user_id, db)
         location = (
             db.query(LocationsModel)
@@ -157,9 +151,7 @@ class ProviderService:
         if location is None:
             raise HTTPException(status_code=404, detail="Active location not found")
 
-        availability = AvailabilityModel(
-            provider_id=provider.id, **data.model_dump()
-        )
+        availability = AvailabilityModel(provider_id=provider.id, **data.model_dump())
         db.add(availability)
         db.commit()
         db.refresh(availability)
@@ -183,9 +175,7 @@ class ProviderService:
             .first()
         )
         if availability is None:
-            raise HTTPException(
-                status_code=404, detail="Availability record not found"
-            )
+            raise HTTPException(status_code=404, detail="Availability record not found")
         return availability
 
     @staticmethod
@@ -220,9 +210,7 @@ class ProviderService:
                 .first()
             )
             if location is None:
-                raise HTTPException(
-                    status_code=404, detail="Active location not found"
-                )
+                raise HTTPException(status_code=404, detail="Active location not found")
 
         for field, value in updates.items():
             setattr(availability, field, value)
@@ -235,9 +223,7 @@ class ProviderService:
         }
 
     @staticmethod
-    def delete_my_availability(
-        user_id: str, availability_id: str, db: Session
-    ):
+    def delete_my_availability(user_id: str, availability_id: str, db: Session):
         availability = ProviderService._get_my_availability_record(
             user_id, availability_id, db
         )
