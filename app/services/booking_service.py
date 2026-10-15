@@ -10,19 +10,13 @@ class BookingService:
     @staticmethod
     def __provider_id_for_user__(user_id: str, db: Session):
         provider = (
-            db.query(ProviderModel)
-            .filter(ProviderModel.user_id == user_id)
-            .first()
+            db.query(ProviderModel).filter(ProviderModel.user_id == user_id).first()
         )
         return provider.id if provider else None
 
     @staticmethod
     def __check_booking__(booking_id: str, user_id: str, db: Session):
-        booking = (
-            db.query(BookingsModel)
-            .filter(BookingsModel.id == booking_id)
-            .first()
-        )
+        booking = db.query(BookingsModel).filter(BookingsModel.id == booking_id).first()
         if not booking:
             raise HTTPException(
                 status_code=404, detail=f"Booking not found with {booking_id}"
@@ -53,9 +47,7 @@ class BookingService:
     @staticmethod
     def get_bookings(user_id: str, db: Session):
         bookings = (
-            db.query(BookingsModel)
-            .filter(BookingsModel.customer_id == user_id)
-            .all()
+            db.query(BookingsModel).filter(BookingsModel.customer_id == user_id).all()
         )
 
         return {
@@ -79,7 +71,8 @@ class BookingService:
         booking = BookingService.__check_booking__(booking_id, user_id, db)
         if booking.status not in (BookingStatus.PENDING, BookingStatus.CONFIRMED):
             raise HTTPException(
-                status_code=409, detail="Booking cannot be cancelled in its current status"
+                status_code=409,
+                detail="Booking cannot be cancelled in its current status",
             )
 
         booking.status = BookingStatus.CANCELLED
