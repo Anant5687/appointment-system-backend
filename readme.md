@@ -1,0 +1,1 @@
+A details for my project
